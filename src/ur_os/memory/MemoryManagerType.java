@@ -2,18 +2,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
  */
-package ur_os.system;
+package ur_os.memory;
 
 /**
  *
- * @author pedro.wightman
+ * @author super
  */
-public enum InterruptType {
-    CPU,
-    IO,
-    SCHEDULER_CPU_TO_RQ,
-    SCHEDULER_RQ_TO_CPU,
-    LOAD,
-    STORE
+public enum MemoryManagerType {
+    CONTIGUOUS,
+    PAGING,
+    SEGMENTATION
     
 }

@@ -34,19 +34,65 @@ public class MFQ extends Scheduler{
     
     @Override
     public void addProcess(Process p){
-       //To be defined
+       if(p.getState() == ProcessState.NEW || p.getState() == ProcessState.IO){
+           p.setState(ProcessState.READY); //If the process comes from the CPU, just add it to the list
+           schedulers.get(0).addProcess(p);
+           p.setCurrentScheduler(0);
+       }else if(p.getState() == ProcessState.CPU){
+           int tempcurrent = p.getCurrentScheduler();
+           if(tempcurrent < schedulers.size()-1){ //If the scheduler is not the last one, go to the next one
+               tempcurrent++;
+           }
+           schedulers.get(tempcurrent).addProcess(p);
+           p.setCurrentScheduler(tempcurrent);
+           p.setState(ProcessState.READY);
+       }
         
     }
     
     void defineCurrentScheduler(){
-        //To be defined
+        int i=0;
+                boolean found = false;
+                while(i < schedulers.size() && !found){
+                    if(schedulers.get(i).isEmpty()){
+                        i++;
+                    }else{
+                        found = true;
+                    }
+                }
+                if(found){
+                    if(!schedulers.get(i).isEmpty()){
+                        this.currentScheduler = i;
+                    }else
+                        System.out.println("Error in planner!");
+                }
     }
     
    
     @Override
     public void getNext(boolean cpuEmpty) {
         
-        //To be defined
+        if(!cpuEmpty){
+            Process tempp = os.getProcessInCPU();
+            currentScheduler = os.getProcessInCPU().getCurrentScheduler();
+            schedulers.get(currentScheduler).getNext(cpuEmpty);
+            
+            if(!os.isCPUEmpty() && tempp != os.getProcessInCPU()){
+                int temp = currentScheduler;
+                defineCurrentScheduler();
+                if(currentScheduler < temp){
+                    tempp = os.getProcessInCPU();
+                    schedulers.get(tempp.getCurrentScheduler()).returnProcess(tempp);
+                    os.removeProcessFromCPU();
+                    schedulers.get(currentScheduler).getNext(cpuEmpty);
+                }
+            }
+        }
+        
+        if(os.isCPUEmpty()){
+            defineCurrentScheduler();
+            schedulers.get(currentScheduler).getNext(os.isCPUEmpty());
+        }
   
     }
     

@@ -4,8 +4,8 @@
  */
 package ur_os.system;
 
-import ur_os.memory.MemoryOperation;
-import ur_os.process.ProcessMemoryManager;
+import ur_os.memory.Memory;
+
 
 /**
  *
@@ -13,44 +13,25 @@ import ur_os.process.ProcessMemoryManager;
  */
 public class MemoryUnit {
     
-    ProcessMemoryManager pmm;
-    CPU cpu;
+    Memory memory;
     
-    
-
-    public MemoryUnit(CPU cpu) {
-        this.cpu = cpu;
+    public MemoryUnit(){
+        memory = new Memory(SystemOS.MEMORY_SIZE);
     }
     
-    public MemoryUnit(CPU cpu, ProcessMemoryManager pmm) {
-        this.cpu = cpu;
-        this.pmm = pmm;
+    public MemoryUnit(Memory m){
+        memory = m;
     }
     
-    public void setPMM(ProcessMemoryManager pmm){
-        this.pmm = pmm;
+    public byte load(int physicalAddress){
+        byte b = memory.get(physicalAddress);
+        System.out.println("The obtained data is: "+b);
+        return b;
     }
     
-    public void executeMemoryOperation(MemoryOperation mop){
-        if(mop.getType() == ur_os.memory.MemoryOperationType.STORE){
-            int i=0;
-        }
-        int logAdd = mop.getLogicalAddress();
-        int phyAdd = getPhysicalAddress(logAdd);
-        switch(mop.getType()){
-            case LOAD:
-                cpu.load(phyAdd);
-                break;
-                
-            case STORE:
-                cpu.store(phyAdd,mop.getContent());
-                break;
-        }
+    public void store(int physicalAddress, byte content){
+        memory.set(physicalAddress, content);
+        System.out.println("The data "+memory.get(physicalAddress)+" is stored in: "+physicalAddress);
     }
-    
-    public int getPhysicalAddress(int logicalAddress){
-        return pmm.getPhysicalAddress(logicalAddress);
-    }
-    
     
 }

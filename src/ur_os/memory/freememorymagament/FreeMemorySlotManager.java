@@ -6,13 +6,14 @@ package ur_os.memory.freememorymagament;
 
 import ur_os.memory.segmentation.SegmentTableEntry;
 import ur_os.memory.segmentation.PMM_Segmentation;
-import ur_os.memory.contiguous.PMM_Contiguous;
+import ur_os.memory.contiguous.SMM_Contiguous;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import ur_os.process.Process;
-import ur_os.process.ProcessMemoryManager;
-import static ur_os.process.ProcessMemoryManagerType.CONTIGUOUS;
-import static ur_os.process.ProcessMemoryManagerType.SEGMENTATION;
+import ur_os.memory.ProcessMemoryManager;
+import static ur_os.memory.MemoryManagerType.CONTIGUOUS;
+import static ur_os.memory.MemoryManagerType.SEGMENTATION;
+import ur_os.memory.contiguous.PMM_Contiguous;
 
 /**
  *
@@ -32,14 +33,14 @@ public abstract class FreeMemorySlotManager extends FreeMemoryManager{
     public void fuseSlots(){
         int tam = list.size();
         for (int i = 0; i < tam-1; i++) {
-            if(list.get(i).getEnd()+1 == list.get(i+1).getBase()){//If the slota are contiguous, fuse then
+            if(list.get(i).getEnd()+1 == list.get(i+1).getBase()){
                 list.get(i).addSlot(list.get(i+1));
                 list.remove(list.get(i+1));
                 tam--;
                 i--;
             }
         }
-        for (int i = 0; i < tam; i++) {//Check if the are slots with 0 size, and remove them
+        for (int i = 0; i < tam; i++) {
             if(list.get(i).getSize() == 0){
                 list.remove(i);
                 tam--;
@@ -57,20 +58,20 @@ public abstract class FreeMemorySlotManager extends FreeMemoryManager{
         while(i<list.size() && list.get(i).getBase() < m.getBase()){
             i++;
         }
-        //If it is not the first one, then change the index to have the previous slot
+        
         if(i > 0){
             i--;
         }
         
-        if(i == 0 && list.get(i).getBase() > m.getBase()){//If the slot is the first one and the incoming slot is indeed the lower one
+        if(i == 0 && list.get(i).getBase() > m.getBase()){//If the slot is the highest one
             list.addFirst(m);
-        }else if (i == list.size()-1){//If the slot is the last one
+        }else if (i == list.size()-1){//If the slot is the first
             list.getLast().addSlot(m);
         }else{
-            list.add(i+1, m); //Insert the slot where it is supose to be
+            list.add(i+1, m);
         }
         
-        fuseSlots(); //Check all the slots and fuse them if possible
+        fuseSlots();
         
     }
 

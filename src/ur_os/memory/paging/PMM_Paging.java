@@ -5,8 +5,8 @@
 package ur_os.memory.paging;
 
 import ur_os.memory.MemoryAddress;
-import ur_os.process.ProcessMemoryManager;
-import ur_os.process.ProcessMemoryManagerType;
+import ur_os.memory.ProcessMemoryManager;
+import ur_os.memory.MemoryManagerType;
 
 /**
  *
@@ -17,7 +17,7 @@ public class PMM_Paging extends ProcessMemoryManager{
     PageTable pt;
 
     public PMM_Paging(int processSize) {
-        super(ProcessMemoryManagerType.PAGING,processSize);
+        super(MemoryManagerType.PAGING,processSize);
         pt = new PageTable(processSize);
     }
 
@@ -43,20 +43,19 @@ public class PMM_Paging extends ProcessMemoryManager{
     }
     
     public MemoryAddress getPageMemoryAddressFromLocalAddress(int locAdd){
-        //To do
-        return null;
+        int page = locAdd/this.getSize();
+        int offset = locAdd%this.getSize();
+        System.out.println("Accessing Page "+page+" and offset "+offset);
+        return new MemoryAddress(page, offset);
     }
     
     public MemoryAddress getFrameMemoryAddressFromLogicalMemoryAddress(MemoryAddress m){
-        //To do
-        return null;
+        int frame = pt.getFrameIdFromPage(m.getDivision());
+        
+        return new MemoryAddress(frame, m.getOffset());
     }
     
-   @Override
-    public int getPhysicalAddress(int logicalAddress){
-        //To do
-        return -1;
-    }
+   
     
      @Override
     public String toString(){

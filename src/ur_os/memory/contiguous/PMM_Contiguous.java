@@ -4,17 +4,16 @@
  */
 package ur_os.memory.contiguous;
 
+import ur_os.memory.MemoryManagerType;
+import ur_os.memory.ProcessMemoryManager;
 import ur_os.memory.freememorymagament.MemorySlot;
-import ur_os.process.ProcessMemoryManager;
-import ur_os.process.ProcessMemoryManagerType;
 
 /**
  *
- * @author super
+ * @author user
  */
 public class PMM_Contiguous extends ProcessMemoryManager{
-    int base;
-    int limit;
+    
     MemorySlot memorySlot;
     
     public PMM_Contiguous() {
@@ -22,49 +21,41 @@ public class PMM_Contiguous extends ProcessMemoryManager{
     }
     
     public PMM_Contiguous(int base, int limit) {
-        super(ProcessMemoryManagerType.CONTIGUOUS, limit);
-        this.base = base;
-        this.limit = limit;
+        super(MemoryManagerType.CONTIGUOUS, limit);
         memorySlot = new MemorySlot(base, limit);
     }
     
     public PMM_Contiguous(int limit) {
-        super(ProcessMemoryManagerType.CONTIGUOUS, limit);
-        this.limit = limit;
+        this(0, limit);
     }
     
     public PMM_Contiguous(MemorySlot m) {
-        super(ProcessMemoryManagerType.CONTIGUOUS, m.getSize());
-        this.base = m.getBase();
-        this.limit = m.getSize();
-        memorySlot = m;
+        this(m.getBase(), m.getSize());
     }
     
     public PMM_Contiguous(PMM_Contiguous pmm) {
         super(pmm);
         if(pmm.getType() == this.getType()){
-            this.base = pmm.base;
-            this.limit = pmm.limit;
-            this.memorySlot = new MemorySlot(pmm.memorySlot);
+            this.memorySlot = new MemorySlot(pmm.getMemorySlot());
         }else{
             System.out.println("Error - Wrong PMM parameter");
         }
     }
 
     public int getBase() {
-        return base;
+        return memorySlot.getBase();
     }
 
     public void setBase(int base) {
-        this.base = base;
+        memorySlot.setBase(base);
     }
 
     public int getLimit() {
-        return limit;
+        return memorySlot.getSize();
     }
 
     public void setLimit(int limit) {
-        this.limit = limit;
+        memorySlot.setSize(limit);
     }
     
     public MemorySlot getMemorySlot(){
@@ -72,22 +63,12 @@ public class PMM_Contiguous extends ProcessMemoryManager{
     }
     
     public void setMemorySlot(MemorySlot m){
-        this.base = m.getBase();
-        this.limit = m.getSize();
-        memorySlot = m;
-    }
-
-    @Override
-    public int getPhysicalAddress(int logicalAddress){
-        
-        //To do
-            
-        return -1;
+        memorySlot = new MemorySlot(m);
     }
     
     @Override
     public String toString(){
-        return "Base: "+base+" Limit: "+limit;
+        return "Base: "+memorySlot.getBase()+" Limit: "+memorySlot.getSize();
     }
     
 }

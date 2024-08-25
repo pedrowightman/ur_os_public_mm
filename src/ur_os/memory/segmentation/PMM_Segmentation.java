@@ -5,8 +5,8 @@
 package ur_os.memory.segmentation;
 
 import ur_os.memory.MemoryAddress;
-import ur_os.process.ProcessMemoryManager;
-import ur_os.process.ProcessMemoryManagerType;
+import ur_os.memory.ProcessMemoryManager;
+import ur_os.memory.MemoryManagerType;
 
 /**
  *
@@ -17,7 +17,7 @@ public class PMM_Segmentation extends ProcessMemoryManager{
     SegmentTable st;
 
     public PMM_Segmentation(int processSize) {
-        super(ProcessMemoryManagerType.SEGMENTATION,processSize);
+        super(MemoryManagerType.SEGMENTATION,processSize);
         st = new SegmentTable(processSize);
     }
 
@@ -54,12 +54,6 @@ public class PMM_Segmentation extends ProcessMemoryManager{
     public MemoryAddress getPhysicalMemoryAddressFromLogicalMemoryAddress(MemoryAddress m){
         
         return st.getPhysicalMemoryAddressFromLogicalMemoryAddress(m);
-    }
-    
-   @Override
-    public int getPhysicalAddress(int logicalAddress){
-       //To do
-        return -1;
     }
     
      @Override

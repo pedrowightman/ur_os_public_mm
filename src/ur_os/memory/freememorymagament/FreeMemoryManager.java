@@ -15,4 +15,6 @@ public abstract class FreeMemoryManager {
     
     public abstract void reclaimMemory(Process p);
     
+    public abstract int getSize();
+    
 }

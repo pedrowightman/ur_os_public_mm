@@ -5,6 +5,7 @@
  */
 package ur_os.system;
 
+import ur_os.memory.Memory;
 import ur_os.memory.MemoryOperation;
 import ur_os.process.Process;
 import ur_os.process.ProcessState;
@@ -22,12 +23,16 @@ public class CPU {
     
     
     public CPU(){
-        this(null);
+        this(null,null);
     }
     
-    public CPU(OS os){
+    public CPU(OS os, Memory m){
         this.os = os;
-        this.mu = new MemoryUnit(this);
+        this.mu = new MemoryUnit(m);
+    }
+    
+    public CPU(Memory m){
+        this(null,m);
     }
     
     public void setOS(OS os){
@@ -37,7 +42,6 @@ public class CPU {
     public void addProcess(Process p){
         this.p = p;
         p.setState(ProcessState.CPU);
-        mu.setPMM(p.getPMM());
     }
     
     public Process getProcess(){
@@ -51,6 +55,10 @@ public class CPU {
     public void update(){
         if(!isEmpty())
             advanceBurst();
+    }
+    
+    public MemoryUnit getMemoryUnit(){
+        return mu;
     }
     
     public void advanceBurst(){
@@ -67,16 +75,28 @@ public class CPU {
         MemoryOperation mop = p.getNextMemoryOperation();
         if(mop != null){
             System.out.println("Process "+p.getPid()+" is executing "+mop);
-            mu.executeMemoryOperation(mop);
+            //mu.executeMemoryOperation(mop);
+            switch(mop.getType()){
+                case LOAD:
+                    os.interrupt(InterruptType.LOAD, p, mop);
+                    break;
+                    
+                case STORE:
+                    os.interrupt(InterruptType.STORE, p, mop);
+                    break;
+            
+            }
+            
         }
     }
+   
     
     public byte load(int physicalAddress) {
-        return os.load(physicalAddress);
+        return mu.load(physicalAddress);
     }
 
     public void store(int physicalAddress, byte content) {
-        os.store(physicalAddress, content);
+        mu.store(physicalAddress, content);
     }
     
     public void removeProcess(){

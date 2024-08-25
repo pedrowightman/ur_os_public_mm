@@ -5,17 +5,16 @@
  */
 package ur_os.system;
 
-import ur_os.memory.contiguous.PMM_Contiguous;
-import ur_os.memory.Memory;
+import ur_os.memory.contiguous.SMM_Contiguous;
 import ur_os.memory.freememorymagament.FreeFramesManager;
 import ur_os.memory.paging.PMM_Paging;
-import ur_os.process.ProcessMemoryManager;
-import ur_os.process.ProcessMemoryManagerType;
+import ur_os.memory.ProcessMemoryManager;
+import ur_os.memory.MemoryManagerType;
 import ur_os.process.Process;
 import ur_os.process.ReadyQueue;
 import ur_os.process.ProcessState;
-import java.util.LinkedList;
 import java.util.Random;
+import ur_os.memory.MemoryOperation;
 import ur_os.memory.freememorymagament.BestFitMemorySlotManager;
 import ur_os.memory.freememorymagament.FirstFitMemorySlotManager;
 import ur_os.memory.freememorymagament.FreeMemoryManager;
@@ -23,10 +22,13 @@ import ur_os.memory.freememorymagament.MemorySlot;
 import ur_os.memory.freememorymagament.FreeMemorySlotManager;
 import ur_os.memory.freememorymagament.WorstFitMemorySlotManager;
 import ur_os.memory.segmentation.PMM_Segmentation;
-import static ur_os.process.ProcessMemoryManagerType.CONTIGUOUS;
+import static ur_os.memory.MemoryManagerType.CONTIGUOUS;
+import ur_os.memory.SystemMemoryManager;
+import ur_os.memory.contiguous.PMM_Contiguous;
+import ur_os.memory.paging.SMM_Paging;
+import ur_os.memory.segmentation.SMM_Segmentation;
 import static ur_os.system.InterruptType.SCHEDULER_CPU_TO_RQ;
 import static ur_os.system.SystemOS.MAX_PROC_SIZE;
-import static ur_os.system.SystemOS.PMM;
 
 
 /**
@@ -40,33 +42,47 @@ public class OS {
     private static int process_count = 0;
     SystemOS system;
     CPU cpu;
-    Memory memory;
+    SystemMemoryManager smm;
     FreeMemoryManager fmm;
-    FreeFramesManager freeFrames;
-    FreeMemorySlotManager msm;
     Random r;
     
-    public OS(SystemOS system, CPU cpu, IOQueue ioq, Memory memory){
+    public OS(SystemOS system, CPU cpu, IOQueue ioq){
         rq = new ReadyQueue(this);
         this.ioq = ioq;
         this.system = system;
         this.cpu = cpu;
-        this.memory = memory;
-        freeFrames = new FreeFramesManager(memory.getSize());
         
-        switch(SystemOS.MSM){
+        
+         if(system.SMM == MemoryManagerType.PAGING){
+            smm = new SMM_Paging(); 
+            fmm = new FreeFramesManager(system.MEMORY_SIZE);
+        }else{
+            switch(system.SMM){
+                case CONTIGUOUS:
+                    smm = new SMM_Contiguous();
+                    break;
+                
+                case SEGMENTATION:
+                    smm = new SMM_Segmentation();
+                    break;
+            }
+             
+             
+            switch(system.MSM){
             case FIRST_FIT:
-                msm = new FirstFitMemorySlotManager();
+                fmm = new FirstFitMemorySlotManager();
                 break;
             case BEST_FIT:
-                msm = new BestFitMemorySlotManager();
+                fmm = new BestFitMemorySlotManager();
                 break;
             case WORST_FIT:
-                msm = new WorstFitMemorySlotManager();
+                fmm = new WorstFitMemorySlotManager();
                 break;
+            }
         }
         
         
+        //r = new Random(SystemOS.SEED_PROCESS_SIZE);
         r = new Random();
     }
     
@@ -83,7 +99,9 @@ public class OS {
         return cpu.getProcess();
     }
     
-    public void interrupt(InterruptType t, Process p){
+    public void interrupt(InterruptType t, Process p, MemoryOperation mop){
+        
+        int logAdd, phyAdd;
         
         switch(t){
         
@@ -91,11 +109,9 @@ public class OS {
                 if(p.isFinished()){//The process finished completely
                     p.setState(ProcessState.FINISHED);
                     p.setTime_finished(system.getTime());
-                    if(SystemOS.PMM == ProcessMemoryManagerType.PAGING){
-                        freeFrames.reclaimMemory(p);
-                    }else{
-                        msm.reclaimMemory(p);
-                    }
+                    System.out.println("Process Terminated: "+p.getPid()+" "+p.getSize());
+                    fmm.reclaimMemory(p);
+                    system.showFreeMemory();
                 }else{
                     ioq.addProcess(p);
                 }
@@ -122,9 +138,26 @@ public class OS {
                 
             break;
             
+            case LOAD:
+                logAdd = mop.getLogicalAddress();
+                phyAdd = smm.getPhysicalAddress(logAdd, p.getPMM());
+                cpu.load(phyAdd);
+               break;
+               
+            case STORE:
+                logAdd = mop.getLogicalAddress();
+                phyAdd = smm.getPhysicalAddress(logAdd, p.getPMM());
+                cpu.store(phyAdd,mop.getContent());
+                break;
             
         }
-        
+
+    }
+    
+    
+    
+    public void interrupt(InterruptType t, Process p){
+        interrupt(t,p,null);
     }
     
     public void removeProcessFromCPU(){
@@ -132,37 +165,42 @@ public class OS {
     }
     
     public void create_process(){
-        Process p = new Process(process_count++, system.getTime());
-        rq.addProcess(p);
-        ProcessMemoryManager pmm;
-        if(SystemOS.PMM == ProcessMemoryManagerType.PAGING){
-            pmm = new PMM_Paging(r.nextInt(SystemOS.MAX_PROC_SIZE));
-            assignFramesToProcess(p);
-        }else{
-            pmm = new PMM_Contiguous(p.getPid()*SystemOS.MAX_PROC_SIZE, r.nextInt(SystemOS.MAX_PROC_SIZE));
-        }
-        
+        create_process(null);
     }
     
     public void create_process(Process p){
-        p.setPid(process_count++);
+        if(p != null){
+            p.setPid(process_count++);
+        }else{
+            p = new Process(process_count++, system.getTime());
+        }
         rq.addProcess(p);
-        
         ProcessMemoryManager pmm;
-        switch (PMM) {
+        switch (system.SMM) {
             case PAGING:
-                pmm = new PMM_Paging(r.nextInt(MAX_PROC_SIZE));
+                if(p.getSize() == 0)
+                    pmm = new PMM_Paging(r.nextInt(MAX_PROC_SIZE-1)+1);
+                else
+                    pmm = new PMM_Paging(p.getSize());
+                
                 p.setPMM(pmm);
                 assignFramesToProcess(p);
                 break;
             case SEGMENTATION:
-                pmm = new PMM_Segmentation(r.nextInt(MAX_PROC_SIZE));
+                if(p.getSize() == 0)
+                    pmm = new PMM_Segmentation(r.nextInt(MAX_PROC_SIZE-1)+1);
+                else
+                    pmm = new PMM_Segmentation(p.getSize());
                 p.setPMM(pmm);
                 assignSegmentsToProcess(p);
                 break;
             default:
             case CONTIGUOUS:
-                pmm = new PMM_Contiguous(r.nextInt(MAX_PROC_SIZE));
+                if(p.getSize() == 0)
+                    pmm = new PMM_Contiguous(r.nextInt(MAX_PROC_SIZE-1)+1);
+                else
+                    pmm = new PMM_Contiguous(p.getSize());
+                
                 p.setPMM(pmm);
                 //get free slot and assign it to the process
                 PMM_Contiguous pmmc = (PMM_Contiguous)p.getPMM();
@@ -173,6 +211,7 @@ public class OS {
     }
     
     public MemorySlot getMemorySlot(int size){
+        FreeMemorySlotManager msm = (FreeMemorySlotManager)fmm;
         return msm.getSlot(size);
     }
     
@@ -192,6 +231,7 @@ public class OS {
     public void assignFramesToProcess(Process p){
         PMM_Paging pmm = (PMM_Paging)p.getPMM();
         int ptSize = pmm.getPt().getSize();
+        FreeFramesManager freeFrames = (FreeFramesManager)fmm;
         if(ptSize <= freeFrames.getSize()){
             for (int i = 0; i < ptSize; i++) {
                 pmm.addFrameID(freeFrames.getFrame());
@@ -207,20 +247,6 @@ public class OS {
         System.out.println(rq.toString());
     }
     
-    public Memory getMemory(){
-        return memory;
-    }
-    
-    public byte load(int physicalAddress){
-        byte b = memory.get(physicalAddress);
-        System.out.println("The obtained data is: "+b);
-        return b;
-    }
-    
-    public void store(int physicalAddress, byte content){
-        memory.set(physicalAddress, content);
-        System.out.println("The data "+memory.get(physicalAddress)+" is stored in: "+physicalAddress);
-    }
     
     public SimulationType getSimulationType() {
         return system.getSimulationType();

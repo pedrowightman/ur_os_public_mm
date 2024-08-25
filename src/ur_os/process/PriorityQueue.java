@@ -2,34 +2,35 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ur_os.process;
+package ur_os;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import ur_os.system.OS;
+
 
 /**
  *
  * @author prestamour
  */
-public class MFQ extends Scheduler{
+public class PriorityQueue extends Scheduler{
 
     int currentScheduler;
     
     private ArrayList<Scheduler> schedulers;
     
-    MFQ(OS os){
+    PriorityQueue(OS os){
         super(os);
         currentScheduler = -1;
         schedulers = new ArrayList();
     }
     
-    MFQ(OS os, Scheduler... s){ //Received multiple arrays
+    PriorityQueue(OS os, Scheduler... s){ //Received multiple arrays
         this(os);
         schedulers.addAll(Arrays.asList(s));
         if(s.length > 0)
             currentScheduler = 0;
     }
+    
     
     @Override
     public void addProcess(Process p){
@@ -44,7 +45,6 @@ public class MFQ extends Scheduler{
    
     @Override
     public void getNext(boolean cpuEmpty) {
-        
         //To be defined
   
     }

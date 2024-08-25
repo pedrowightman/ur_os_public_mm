@@ -38,7 +38,7 @@ public class SystemOS implements Runnable{
     
     private Memory memory;
     public static final int PAGE_SIZE = 64; //Page size in bytes
-    public static final MemoryManagerType SMM = MemoryManagerType.SEGMENTATION;
+    public static final MemoryManagerType SMM = MemoryManagerType.CONTIGUOUS;
     public static final FreeMemorySlotManagerType MSM = FreeMemorySlotManagerType.FIRST_FIT;
     
     public static final int SEED_SEGMENTS = 7401;

@@ -21,31 +21,7 @@ public class SJF_NP extends Scheduler{
    
     @Override
     public void getNext(boolean cpuEmpty) {
-       if(!processes.isEmpty() && cpuEmpty)
-        {   
-            
-            int min_r = 9999;
-            int temp_r;
-            Process p = null;
-            
-            for (Process process : processes) {
-                if(process.isCurrentBurstCPU()){
-                    temp_r = process.getRemainingTimeInCurrentBurst();
-                    if(temp_r < min_r){
-                        min_r = temp_r;
-                        p = process;
-                    }else if(temp_r == min_r){//If there is a tie
-                        if(p.getPid() < process.getPid()){ //Priority to larger PID
-                            min_r = temp_r;
-                            p = process;
-                        }
-                    }
-                }
-            }
-            
-            processes.remove(p);
-            os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, p);
-        }
+       //To be defined
         
     }
     

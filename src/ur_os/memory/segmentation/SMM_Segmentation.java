@@ -19,14 +19,8 @@ public class SMM_Segmentation extends SystemMemoryManager{
     @Override
     public int getPhysicalAddress(int logicalAddress, ProcessMemoryManager pmm){
         
-        if(pmm.getType() == MemoryManagerType.SEGMENTATION){
-            PMM_Segmentation pmms = (PMM_Segmentation)pmm;
-
-            MemoryAddress la = pmms.getSegmentMemoryAddressFromLocalAddress(logicalAddress);
-            MemoryAddress pa = pmms.getPhysicalMemoryAddressFromLogicalMemoryAddress(la);
-
-            return pa.getAddress();
-        }
+        //To be defined
+        
         return -1;
     }
     

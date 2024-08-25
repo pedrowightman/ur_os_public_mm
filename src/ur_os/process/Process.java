@@ -10,6 +10,7 @@ import ur_os.memory.MemoryOperation;
 import ur_os.memory.MemoryOperationList;
 import ur_os.memory.contiguous.PMM_Contiguous;
 import ur_os.memory.contiguous.SMM_Contiguous;
+import java.util.Random;
 
 /**
  *
@@ -26,6 +27,8 @@ public class Process implements Comparable{
     ProcessState state;
     int currentScheduler;
     int size;
+    int priority;
+    Random r;
 
     ProcessMemoryManager pmm;
     MemoryOperationList mol;
@@ -51,6 +54,8 @@ public class Process implements Comparable{
     }
     
     public Process(boolean autoProc, boolean autoMem, int pid, int time_init, ProcessMemoryManager pmm) {
+        r = new Random();
+        this.priority = 0;
         this.pid = pid;
         this.time_init = time_init;
         time_finished = -1;
@@ -66,6 +71,7 @@ public class Process implements Comparable{
         if(autoProc){
             pbl.generateRandomBursts(NUM_CPU_CYCLES, MAX_CPU_CYCLES, MAX_IO_CYCLES);
             //pbl.generateSimpleBursts(); //Generates process with 3 bursts (CPU, IO, CPU) with 5 cycles each
+            priority = r.nextInt(10);
         }
         
         if(autoMem){
@@ -187,6 +193,14 @@ public class Process implements Comparable{
 
     public void setPbl(ProcessBurstList pbl) {
         this.pbl = pbl;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     public int getCurrentScheduler() {

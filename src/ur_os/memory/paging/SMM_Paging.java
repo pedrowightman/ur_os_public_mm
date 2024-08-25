@@ -19,16 +19,7 @@ public class SMM_Paging extends SystemMemoryManager{
     
     @Override
     public int getPhysicalAddress(int logicalAddress, ProcessMemoryManager pmm){
-        
-        if(pmm.getType() == MemoryManagerType.PAGING){
-            PMM_Paging pmmp = (PMM_Paging)pmm;
-        
-            MemoryAddress la = pmmp.getPageMemoryAddressFromLocalAddress(logicalAddress);
-            MemoryAddress pa = pmmp.getFrameMemoryAddressFromLogicalMemoryAddress(la);
-
-            return pa.getAddress();
-        
-        }
+        //To be defined
         return -1;
     };
     

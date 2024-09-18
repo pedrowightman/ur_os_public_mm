@@ -43,14 +43,12 @@ public class PMM_Paging extends ProcessMemoryManager{
     }
     
     public MemoryAddress getPageMemoryAddressFromLocalAddress(int locAdd){
-        int page = locAdd/this.getSize();
-        int offset = locAdd%this.getSize();
-        System.out.println("Accessing Page "+page+" and offset "+offset);
+        //To do
         return new MemoryAddress(page, offset);
     }
     
     public MemoryAddress getFrameMemoryAddressFromLogicalMemoryAddress(MemoryAddress m){
-        int frame = pt.getFrameIdFromPage(m.getDivision());
+        //To do
         
         return new MemoryAddress(frame, m.getOffset());
     }

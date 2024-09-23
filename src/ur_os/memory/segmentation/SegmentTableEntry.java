@@ -4,6 +4,7 @@
  */
 package ur_os.memory.segmentation;
 
+
 import ur_os.memory.freememorymagament.MemorySlot;
 
 /**
@@ -11,32 +12,24 @@ import ur_os.memory.freememorymagament.MemorySlot;
  * @author super
  */
 public class SegmentTableEntry {
-    
-    int base;
-    int limit;
     boolean dirty;
     MemorySlot m;
 
     public SegmentTableEntry(int base, int limit) {
-        this.base = base;
-        this.limit = limit;
+        m = new MemorySlot(base, limit);
         dirty = false;
     }
     
     public SegmentTableEntry(MemorySlot m) {
-        this.base = m.getBase();
-        this.limit = m.getSize();
-        dirty = false;
+        this(m.getBase(), m.getSize());
     }
     
     public void setSegment(int base, int limit){
-        this.base = base;
-        this.limit = limit;
+        m = new MemorySlot(base, limit);
     }
     
     public void setMemorySlot(MemorySlot m){
         setSegment(m.getBase(), m.getSize());
-        this.m = m;
     }
     
     public MemorySlot getMemorySlot(){
@@ -48,19 +41,19 @@ public class SegmentTableEntry {
     }
 
     public int getBase() {
-        return base;
+        return m.getBase();
     }
 
     public void setBase(int base) {
-        this.base = base;
+        this.m.setBase(base);
     }
 
     public int getLimit() {
-        return limit;
+        return m.getSize();
     }
 
     public void setLimit(int limit) {
-        this.limit = limit;
+        this.m.setSize(limit);
     }
     
     public boolean isDirty(){
@@ -69,7 +62,7 @@ public class SegmentTableEntry {
     
     @Override
     public String toString(){
-        return "Base: "+base+" Limit: "+limit+" Dirty: "+dirty;
+        return "Base: "+m.getBase()+" Limit: "+m.getSize()+" Dirty: "+dirty;
     }
     
     

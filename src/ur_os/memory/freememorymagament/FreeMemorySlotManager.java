@@ -7,7 +7,6 @@ package ur_os.memory.freememorymagament;
 import ur_os.memory.segmentation.SegmentTableEntry;
 import ur_os.memory.segmentation.PMM_Segmentation;
 import ur_os.memory.contiguous.SMM_Contiguous;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import ur_os.process.Process;
 import ur_os.memory.ProcessMemoryManager;
@@ -31,47 +30,15 @@ public abstract class FreeMemorySlotManager extends FreeMemoryManager{
     public abstract MemorySlot getSlot(int size);
     
     public void fuseSlots(){
-        int tam = list.size();
-        for (int i = 0; i < tam-1; i++) {
-            if(list.get(i).getEnd()+1 == list.get(i+1).getBase()){
-                list.get(i).addSlot(list.get(i+1));
-                list.remove(list.get(i+1));
-                tam--;
-                i--;
-            }
-        }
-        for (int i = 0; i < tam; i++) {
-            if(list.get(i).getSize() == 0){
-                list.remove(i);
-                tam--;
-                i--;
-            }
-        }
+
+        //If you need to fuse slots, you may need to call this method. This method, as designed originally, will go over the list of slots looking for
+        //contiguous slots to fuse. This can me be called after you have inserted the slot in the proper location.
         
     }
     
     private void returnMemorySlot(MemorySlot m){
-        
-        
-        int i = 0;
-        //Find the slot with a higher base address than the one inserted
-        while(i<list.size() && list.get(i).getBase() < m.getBase()){
-            i++;
-        }
-        
-        if(i > 0){
-            i--;
-        }
-        
-        if(i == 0 && list.get(i).getBase() > m.getBase()){//If the slot is the highest one
-            list.addFirst(m);
-        }else if (i == list.size()-1){//If the slot is the first
-            list.getLast().addSlot(m);
-        }else{
-            list.add(i+1, m);
-        }
-        
-        fuseSlots();
+
+        //Return the memory slot to its proper place. If the memory slot is contiguous to 1 or 2 more slots, they will need to be fused into a single slot  
         
     }
 

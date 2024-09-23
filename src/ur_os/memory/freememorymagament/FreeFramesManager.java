@@ -55,21 +55,7 @@ public class FreeFramesManager extends FreeMemoryManager{
             this.freeFrames.add(pte.getFrameId());
         }
         
-        //this.freeFrames.sort(new SortByPageTableEntry());
-        
         java.util.Collections.sort(freeFrames);
     }
     
 }
-
-//Class for comparing integers in a list
-/*class SortByPageTableEntry implements Comparator<Integer> {
- 
-    // Method
-    // Sorting in ascending order of roll number
-    public int compare(Integer a, Integer b)
-    {
- 
-        return a.intValue() - b.intValue();
-    }
-}*/

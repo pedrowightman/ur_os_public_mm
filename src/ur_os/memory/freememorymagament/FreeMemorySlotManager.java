@@ -8,6 +8,7 @@ import ur_os.memory.segmentation.SegmentTableEntry;
 import ur_os.memory.segmentation.PMM_Segmentation;
 import ur_os.memory.contiguous.SMM_Contiguous;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import ur_os.process.Process;
 import ur_os.memory.ProcessMemoryManager;
 import static ur_os.memory.MemoryManagerType.CONTIGUOUS;
